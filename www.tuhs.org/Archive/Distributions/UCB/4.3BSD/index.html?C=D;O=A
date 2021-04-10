@@ -1,0 +1,31 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+ <head>
+  <title>Index of /Archive/Distributions/UCB/4.3BSD</title>
+ </head>
+ <body>
+<h1>Index of /Archive/Distributions/UCB/4.3BSD</h1>
+  <table>
+   <tr><th valign="top"><img src="/icons/blank.gif" alt="[ICO]"></th><th><a href="?C=N;O=A">Name</a></th><th><a href="?C=M;O=A">Last modified</a></th><th><a href="?C=S;O=A">Size</a></th><th><a href="?C=D;O=D">Description</a></th></tr>
+   <tr><th colspan="5"><hr></th></tr>
+<tr><td valign="top"><img src="/icons/back.gif" alt="[PARENTDIR]"></td><td><a href="/Archive/Distributions/UCB/">Parent Directory</a></td><td>&nbsp;</td><td align="right">  - </td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="FORMAT">FORMAT</a></td><td align="right">1998-11-13 16:23  </td><td align="right">115 </td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="ingres.lst">ingres.lst</a></td><td align="right">1999-10-03 06:43  </td><td align="right"> 38K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/compressed.gif" alt="[   ]"></td><td><a href="ingres.tar.gz">ingres.tar.gz</a></td><td align="right">1998-11-13 21:24  </td><td align="right">640K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/compressed.gif" alt="[   ]"></td><td><a href="miniroot.gz">miniroot.gz</a></td><td align="right">1998-11-13 09:12  </td><td align="right">521K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="new.lst">new.lst</a></td><td align="right">1999-10-03 06:44  </td><td align="right">356K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/compressed.gif" alt="[   ]"></td><td><a href="new.tar.gz">new.tar.gz</a></td><td align="right">1998-11-13 21:11  </td><td align="right"> 11M</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/compressed.gif" alt="[   ]"></td><td><a href="rootdump.gz">rootdump.gz</a></td><td align="right">1998-11-13 09:33  </td><td align="right">1.6M</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="src.lst">src.lst</a></td><td align="right">1999-10-03 06:44  </td><td align="right">330K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/compressed.gif" alt="[   ]"></td><td><a href="src.tar.gz">src.tar.gz</a></td><td align="right">1998-11-13 13:41  </td><td align="right">6.0M</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="srcsys.lst">srcsys.lst</a></td><td align="right">1999-10-03 06:44  </td><td align="right"> 51K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/compressed.gif" alt="[   ]"></td><td><a href="srcsys.tar.gz">srcsys.tar.gz</a></td><td align="right">1998-11-13 12:13  </td><td align="right">1.6M</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/compressed.gif" alt="[   ]"></td><td><a href="stand.gz">stand.gz</a></td><td align="right">1998-11-13 09:04  </td><td align="right"> 23K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="usr.lst">usr.lst</a></td><td align="right">1999-10-03 06:45  </td><td align="right">226K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/compressed.gif" alt="[   ]"></td><td><a href="usr.tar.gz">usr.tar.gz</a></td><td align="right">1998-11-13 11:48  </td><td align="right">9.3M</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="vfont.lst">vfont.lst</a></td><td align="right">1999-10-03 06:45  </td><td align="right"> 24K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/compressed.gif" alt="[   ]"></td><td><a href="vfont.tar.gz">vfont.tar.gz</a></td><td align="right">1998-11-13 14:06  </td><td align="right">1.7M</td><td>&nbsp;</td></tr>
+   <tr><th colspan="5"><hr></th></tr>
+</table>
+<address>Apache/2.4.29 (Ubuntu) Server at www.tuhs.org Port 443</address>
+</body></html>

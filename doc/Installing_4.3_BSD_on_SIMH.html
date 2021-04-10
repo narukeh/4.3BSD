@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="https://hekuran.ga/cssjs/sp.css" type="text/css">
+  <title>Installing 4.3 BSD on SIMH</title>
+</head>
+<h1>Installing 4.3 BSD on SIMH</h1>
+
+<hr>
+<div class="page" id="readability-page-1"><div dir="ltr" lang="en" id="mw-content-text"><p>This is the procedure that I have used to install <a title="4.3 BSD" href="https://gunkies.org/wiki/4.3_BSD">4.3 BSD</a> onto <a title="SIMH" href="https://gunkies.org/wiki/SIMH">SIMH</a>'s vax 11/780 emulator.  Please note that this is the STOCK 4.3 BSD, not RENO, TAHOE or any other variant.
+</p>
+<div id="toc"><p></p><h2>Contents</h2><p></p>
+<ul>
+<li><a href="#Requirements"><span>1</span> <span>Requirements</span></a></li>
+<li><a href="#Preparing_for_installation"><span>2</span> <span>Preparing for installation</span></a></li>
+<li><a href="#Boot_1."><span>3</span> <span>Boot 1.</span></a>
+<ul>
+<li><a href="#install.ini"><span>3.1</span> <span>install.ini</span></a></li>
+<li><a href="#Booting_the_emulator"><span>3.2</span> <span>Booting the emulator</span></a></li>
+<li><a href="#Restoring_the_rootdump"><span>3.3</span> <span>Restoring the rootdump</span></a></li>
+</ul>
+</li>
+<li><a href="#Boot_2."><span>4</span> <span>Boot 2.</span></a>
+<ul>
+<li><a href="#boot.ini"><span>4.1</span> <span>boot.ini</span></a></li>
+<li><a href="#Booting_the_emulator_2"><span>4.2</span> <span>Booting the emulator</span></a></li>
+<li><a href="#Preparing_the_disk"><span>4.3</span> <span>Preparing the disk</span></a></li>
+<li><a href="#Restoring_the_usr_slice"><span>4.4</span> <span>Restoring the usr slice</span></a></li>
+<li><a href="#Configuring_the_fstab"><span>4.5</span> <span>Configuring the fstab</span></a></li>
+</ul>
+</li>
+<li><a href="#First_Multiuser_Boot"><span>5</span> <span>First Multiuser Boot</span></a>
+<ul>
+<li><a href="#Enabling_remote_users"><span>5.1</span> <span>Enabling remote users</span></a></li>
+</ul>
+</li>
+<li><a href="#Idle"><span>6</span> <span>Idle</span></a></li>
+</ul>
+</div>
+
+<h2><span id="Requirements">Requirements</span></h2>
+<p>You will need the following materials to put together a 4.3 BSD installation:
+</p>
+<ul><li>A working perl interpeter to make the tape images.<br></li>
+<li>A copy of gzip.<br></li>
+<li>A method of extracting the boot file from either the binaries (tar/gzip) or uudecode to extract it from <a title="Boot42" href="https://gunkies.org/wiki/Boot42">here</a>.<br></li>
+<li>A compiled binary of vax780 from <a title="SIMH" href="https://gunkies.org/wiki/SIMH">SIMH</a>, along with the vmb.exe again from <a title="SIMH" href="https://gunkies.org/wiki/SIMH">SIMH</a>.</li></ul>
+<div><p>
+You will need the following files from any 4 BSD archive from the 4.3BSD directory. You can use the files from the <a title="The Unix Heritage Society" href="https://gunkies.org/wiki/The_Unix_Heritage_Society">TUHS</a> archive,  <a href="https://www.tuhs.org/Archive/Distributions/UCB/4.3BSD/" rel="nofollow">here</a>. You can use whatever method you like to download them, wget, a web browser etc..</p></div>
+<h2><span id="Preparing_for_installation">Preparing for installation</span></h2>
+<p>With the files downloaded you will need to uncompress them all and then create the tape file.
+</p><p>The following command will decompress the tape files.
+</p>
+<pre>gzip -d *.gz
+</pre>
+<p>The tape needs to be created with the <a title="Mkdisttap.pl" href="https://gunkies.org/wiki/Mkdisttap.pl">mkdisttap.pl</a> program.  Simply run the program and redirect it into a file called 43.tap .
+</p>
+<pre>% ./mkdisttap.pl &gt; 43.tap
+% ls -l 43.tap
+-rw-r--r--  1 Neozeed  None_ploc  111442472 Feb  6 15:18 43.tap
+</pre>
+<p>Next you will need the boot program.  The boot program from <a title="4.2 BSD" href="https://gunkies.org/wiki/4.2_BSD">4.2 BSD</a> works with <a title="4.3 BSD" href="https://gunkies.org/wiki/4.3_BSD">4.3 BSD</a>. I have uploaded a copy onto this wiki in uuencoded format.  To decode it, simply access the <a title="Boot42" href="https://gunkies.org/wiki/Boot42">article</a>, and copy the contents of the quoted text (the begin/end part INCLUDING the begin &amp; end segments) and save it to a text file.  Then you will need to run the uudecode file as follows:
+</p>
+<pre>% ls -l boot42.uue
+-rw-r--r--  1 Neozeed  None_ploc  9117 Feb  6 12:09 boot42.uue
+% uudecode boot42.uue
+% ls -l boot42
+-rw-------  1 Neozeed  None_ploc  6600 Feb  6 12:28 boot42
+% file boot42
+boot42: data
+</pre>
+<h2><span id="Boot_1.">Boot 1.</span></h2>
+<p>We are going to use the following config file to start the first phase of the installation.  Save the following configuration into a file such as 'install.ini'.  Since we are going to boot directly into the miniroot the rq1 disk will hold the installation target.  Since the 'normal' way to install is to install from tape onto the first disk, we will have to add a device file uppon boot for the second disk, and be sure to point the xtr program to the second disk.
+</p>
+<h3><span id="install.ini">install.ini</span></h3>
+<pre>set rq0 ra81
+at rq0 miniroot
+set rq1 ra81
+at rq1 rq.dsk
+set rq2 dis
+set rq3 dis
+set rp dis
+set lpt dis
+set rl dis
+set tq dis
+set tu dis
+att ts 43.tap
+set tti 7b
+set tto 7b
+load -o boot42 0
+d r10 9
+d r11 0
+run 2
+</pre>
+<h3><span id="Booting_the_emulator">Booting the emulator</span></h3>
+<p>You then simply run the emulator and pass it the config file.
+</p>
+<pre>C:\4.3BSD\work&gt;vax780.exe install.ini
+
+VAX780 simulator V3.8-0
+RQ: creating new file
+install.ini&gt; set rq1 dis
+Command not allowed
+loading ra(0,0)boot
+Boot
+: ra(0,0)vmunix
+279844+80872+100324 start 0x12f8
+4.3 BSD UNIX #1: Fri Jun  6 19:55:29 PDT 1986
+    karels@monet.Berkeley.EDU:/usr/src/sys/GENERIC
+real mem  = 8388608
+SYSPTSIZE limits number of buffers to 140
+avail mem = 7187456
+using 140 buffers containing 524288 bytes of memory
+mcr0 at tr1
+mcr1 at tr2
+uba0 at tr3
+hk0 at uba0 csr 177440 vec 210, ipl 15
+rk0 at hk0 slave 0
+rk1 at hk0 slave 1
+rk2 at hk0 slave 2
+rk3 at hk0 slave 3
+uda0 at uba0 csr 172150 vec 774, ipl 15
+ra0 at uda0 slave 0
+ra1 at uda0 slave 1
+zs0 at uba0 csr 172520 vec 224, ipl 15
+ts0 at zs0 slave 0
+dz0 at uba0 csr 160100 vec 300, ipl 15
+dz1 at uba0 csr 160110 vec 310, ipl 15
+dz2 at uba0 csr 160120 vec 320, ipl 15
+dz3 at uba0 csr 160130 vec 330, ipl 15
+Changing root device to ra0a
+WARNING: clock lost 121 days -- CHECK AND RESET THE DATE!
+erase ^?, kill ^U, intr ^C
+#
+</pre>
+<h3><span id="Restoring_the_rootdump">Restoring the rootdump</span></h3>
+<p>From here we are now running from the miniroot.  The next steps are as follows:
+</p>
+<pre># cd /dev
+# ./MAKEDEV ra1
+# cd /
+# disk=ra1 type=ra81 tape=ts xtr
+</pre>
+<p>This will create a 'device' for the ra1 disk, then run the xtr program to restore the root dump.  Take note that the chgrp &amp; chmod commands are not found, however the install will proceed as normal.
+</p>
+<pre>erase ^?, kill ^U, intr ^C
+# cd /dev
+# ./MAKEDEV ra1
+./MAKEDEV: chgrp: not found
+./MAKEDEV: chmod: not found
+# cd /
+# disk=ra1 type=ra81 tape=ts xtr
+Build root file system
+Warning: 538 sector(s) in last cylinder unallocated
+/dev/rra1a:     15884 sectors in 23 cylinders of 14 tracks, 51 sectors
+        8.1Mb in 2 cyl groups (16 c/g, 5.85Mb/g, 1856 i/g)
+super-block backups (for fsck -b#) at:
+ 32, 11520,
+Check the file system
+** /dev/rra1a
+** Last Mounted on
+** Phase 1 - Check Blocks and Sizes
+** Phase 2 - Check Pathnames
+** Phase 3 - Check Connectivity
+** Phase 4 - Check Reference Counts
+** Phase 5 - Check Cyl groups
+2 files, 9 used, 7420 free (20 frags, 925 blocks, 0.3% fragmentation)
+Rewind tape
+Restore the dump image of the root
+Warning: ./lost+found: File exists
+** /dev/rra1a
+** Last Mounted on /a
+** Phase 1 - Check Blocks and Sizes
+** Phase 2 - Check Pathnames
+** Phase 3 - Check Connectivity
+** Phase 4 - Check Reference Counts
+** Phase 5 - Check Cyl groups
+317 files, 4199 used, 3230 free (6 frags, 403 blocks, 0.1% fragmentation)
+Root filesystem extracted
+
+If this is an 8650 or 8600, update the console rl02
+If this is a 780 or 785, update the floppy
+If this is a 730, update the cassette
+#
+</pre>
+<p>After this stage, I just sync the disk a few times, then halt the emulator (CONTROL+E) and exit out.  Now we are ready for stage two.
+</p>
+<pre>If this is a 730, update the cassette
+# sync
+# sync
+# sync
+
+Simulation stopped, PC: 800018AE (BRB 800018A3)
+sim&gt; q
+Goodbye
+
+C:\4.3BSD\work&gt;
+</pre>
+<h2><span id="Boot_2.">Boot 2.</span></h2>
+<p>Now that the install disk is prepared, we need to use a different config file to reflect us going back to a single disk/tape configuration.  The new configuration is as follows:
+</p>
+<h3><span id="boot.ini">boot.ini</span></h3>
+<pre>set rq0 ra81
+att rq0 rq.dsk
+set rq1 dis
+set rq2 dis
+set rq3 dis
+set rp dis
+set lpt dis
+set rl dis
+set tq dis
+set tu dis
+att ts 43.tap
+set tti 7b
+set tto 7b
+load -o boot42 0
+d r10 9
+d r11 0
+run 2
+</pre>
+<h3><span id="Booting_the_emulator_2">Booting the emulator</span></h3>
+<p>Now boot up the emulator with the boot.ini
+</p>
+<pre>C:\4.3BSD\work&gt;vax780.exe boot.ini
+
+VAX780 simulator V3.8-0
+loading ra(0,0)boot
+Boot
+: ra(0,0)vmunix
+279844+80872+100324 start 0x12f8
+4.3 BSD UNIX #1: Fri Jun  6 19:55:29 PDT 1986
+    karels@monet.Berkeley.EDU:/usr/src/sys/GENERIC
+real mem  = 8388608
+SYSPTSIZE limits number of buffers to 140
+avail mem = 7187456
+using 140 buffers containing 524288 bytes of memory
+mcr0 at tr1
+mcr1 at tr2
+uba0 at tr3
+hk0 at uba0 csr 177440 vec 210, ipl 15
+rk0 at hk0 slave 0
+rk1 at hk0 slave 1
+rk2 at hk0 slave 2
+rk3 at hk0 slave 3
+uda0 at uba0 csr 172150 vec 774, ipl 15
+ra0 at uda0 slave 0
+zs0 at uba0 csr 172520 vec 224, ipl 15
+ts0 at zs0 slave 0
+dz0 at uba0 csr 160100 vec 300, ipl 15
+dz1 at uba0 csr 160110 vec 310, ipl 15
+dz2 at uba0 csr 160120 vec 320, ipl 15
+dz3 at uba0 csr 160130 vec 330, ipl 15
+Changing root device to ra0a
+Automatic reboot in progress...
+Thu Feb  6 07:35:07 PST 1986
+Can't open checklist file: /etc/fstab
+Automatic reboot failed... help!
+erase ^?, kill ^U, intr ^C
+#
+</pre>
+<h3><span id="Preparing_the_disk">Preparing the disk</span></h3>
+<p>Now we have to prep the machine for both the tape, and the type of disk.  Type in the following commands.
+</p>
+<pre># disk=ra
+# name=ra0h;type=ra81
+# cd /dev
+# sh ./MAKEDEV ts0;sync
+# cd /
+# newfs $name $type
+</pre>
+<p>The output will be like this:
+</p>
+<pre># disk=ra
+# name=ra0h;type=ra81
+# cd /dev
+# sh ./MAKEDEV ts0;sync
+# cd /
+# newfs $name $type
+Warning: 680 sector(s) in last cylinder unallocated
+/dev/rra0h:     291346 sectors in 409 cylinders of 14 tracks, 51 sectors
+        149.2Mb in 26 cyl groups (16 c/g, 5.85Mb/g, 2048 i/g)
+super-block backups (for fsck -b#) at:
+ 32, 11520, 23008, 34496, 45984, 57472, 68960, 80448, 91936, 103424,
+ 114912, 126400, 137888, 149376, 160864, 172352, 182816, 194304, 205792, 217280,
+ 228768, 240256, 251744, 263232, 274720, 286208,
+#
+</pre>
+<h3><span id="Restoring_the_usr_slice">Restoring the usr slice</span></h3>
+<p>The disk's /usr slice will not have been formatted.  We can not go ahead and mount it, and restore the /usr files.  Then we unmount the slice, and run fsck to make sure everything is ok.
+</p>
+<pre># mount /dev/$name /usr
+# cd /usr
+# mkdir sys
+# cd sys
+# mt rew
+# mt fsf 3
+# tar xpbf 20 /dev/rmt12
+# cd ..
+# mt fsf
+# tar xpbf 20 /dev/rmt12
+# cd /
+# chmod 755 / /usr /usr/sys
+# rm -rf sys
+# ln -s /usr/sys sys
+# umount /dev/$name
+# fsck /dev/r$name
+</pre>
+<p>Likewise, the output should be similar to this:
+</p>
+<pre># mount /dev/$name /usr
+# cd /usr
+# mkdir sys
+# cd sys
+# mt rew
+# mt fsf 3
+# tar xpbf 20 /dev/rmt12
+# cd ..
+# mt fsf
+# tar xpbf 20 /dev/rmt12
+# cd /
+# chmod 755 / /usr /usr/sys
+# rm -rf sys
+# ln -s /usr/sys sys
+# umount /dev/$name
+# fsck /dev/r$name
+** /dev/rra0h
+** Last Mounted on /usr
+** Phase 1 - Check Blocks and Sizes
+** Phase 2 - Check Pathnames
+** Phase 3 - Check Connectivity
+** Phase 4 - Check Reference Counts
+** Phase 5 - Check Cyl groups
+4645 files, 35630 used, 102954 free (162 frags, 12849 blocks, 0.1% fragmentation)
+#
+</pre>
+<h3><span id="Configuring_the_fstab">Configuring the fstab</span></h3>
+<p>Now we just need to create the fstab, format the 'home' slice, and then we can reboot the emulator into multiuser mode.  Enter in the following commands:
+</p>
+<pre># cd /etc
+# cp fstab.ra81 fstab
+# newfs ra0g ra81
+# sync
+# reboot
+</pre>
+<p>And the expected output is as follows:
+</p>
+<pre># cp fstab.ra81 fstab
+# newfs ra0g ra81
+/dev/rra0g:     515508 sectors in 722 cylinders of 14 tracks, 51 sectors
+        263.9Mb in 46 cyl groups (16 c/g, 5.85Mb/g, 2048 i/g)
+super-block backups (for fsck -b#) at:
+ 32, 11520, 23008, 34496, 45984, 57472, 68960, 80448, 91936, 103424,
+ 114912, 126400, 137888, 149376, 160864, 172352, 182816, 194304, 205792, 217280,
+
+ 228768, 240256, 251744, 263232, 274720, 286208, 297696, 309184, 320672, 332160,
+
+ 343648, 355136, 365600, 377088, 388576, 400064, 411552, 423040, 434528, 446016,
+
+ 457504, 468992, 480480, 491968, 503456, 514944,
+# sync
+# reboot
+syncing disks... done
+
+Reboot requested, PC: 8002B03A (MOVL 8004F628,R0)
+sim&gt; q
+Goodbye
+</pre>
+<h2><span id="First_Multiuser_Boot">First Multiuser Boot</span></h2>
+<p>Now we can just re-run the last command, and we should boot multiuser!  By default there is no root password.  Also the system will run fsck uppon boot, so depending on your host computer this could take a while.
+</p>
+<pre>C:\4.3BSD\work&gt;vax780.exe boot.ini
+
+VAX780 simulator V3.8-0
+loading ra(0,0)boot
+Boot
+: ra(0,0)vmunix
+279844+80872+100324 start 0x12f8
+4.3 BSD UNIX #1: Fri Jun  6 19:55:29 PDT 1986
+    karels@monet.Berkeley.EDU:/usr/src/sys/GENERIC
+real mem  = 8388608
+SYSPTSIZE limits number of buffers to 140
+avail mem = 7187456
+using 140 buffers containing 524288 bytes of memory
+mcr0 at tr1
+mcr1 at tr2
+uba0 at tr3
+hk0 at uba0 csr 177440 vec 210, ipl 15
+rk0 at hk0 slave 0
+rk1 at hk0 slave 1
+rk2 at hk0 slave 2
+rk3 at hk0 slave 3
+uda0 at uba0 csr 172150 vec 774, ipl 15
+ra0 at uda0 slave 0
+zs0 at uba0 csr 172520 vec 224, ipl 15
+ts0 at zs0 slave 0
+dz0 at uba0 csr 160100 vec 300, ipl 15
+dz1 at uba0 csr 160110 vec 310, ipl 15
+dz2 at uba0 csr 160120 vec 320, ipl 15
+dz3 at uba0 csr 160130 vec 330, ipl 15
+Changing root device to ra0a
+Automatic reboot in progress...
+Thu Feb  6 07:43:43 PST 1986
+/dev/ra0a: 330 files, 4200 used, 3229 free (5 frags, 403 blocks, 0.1% fragmentat
+ion)
+/dev/rra0h: 4645 files, 35630 used, 102954 free (162 frags, 12849 blocks, 0.1% f
+ragmentation)
+/dev/rra0g: 2 files, 9 used, 245216 free (16 frags, 30650 blocks, 0.0% fragmenta
+tion)
+Thu Feb  6 07:43:50 PST 1986
+checking quotas: done.
+starting system logger
+checking for core dump... /a/crash: No such file or directory
+
+Feb  6 07:43:51 myname savecore: /a/crash: No such file or directory
+starting local daemons:Feb  6 07:43:51 myname named[53]: /etc/named.boot: No suc
+h file or directory
+ named sendmail.
+preserving editor files
+clearing /tmp
+standard daemons: update cron accounting.
+starting network daemons: rwhod inetd printer.
+Thu Feb  6 07:43:52 PST 1986
+Feb  6 07:43:54 myname getty: /dev/tty03: No such file or directory
+Feb  6 07:43:54 myname getty: /dev/tty02: No such file or directory
+Feb  6 07:43:54 myname getty: /dev/tty05: No such file or directory
+Feb  6 07:43:54 myname getty: /dev/tty04: No such file or directory
+Feb  6 07:43:54 myname getty: /dev/tty07: No such file or directory
+Feb  6 07:43:54 myname getty: /dev/tty06: No such file or directory
+Feb  6 07:43:54 myname getty: /dev/tty00: No such file or directory
+Feb  6 07:43:54 myname getty: /dev/tty01: No such file or directory
+
+
+4.3 BSD UNIX (myname.my.domain) (console)
+
+login:
+</pre>
+<p><br>
+Now we can simply logon as root.
+</p>
+<pre>login: root
+Feb  6 07:43:56 myname login: ROOT LOGIN console
+4.3 BSD UNIX #1: Fri Jun  6 19:55:29 PDT 1986
+
+Would you like to play a game?
+
+Don't login as root, use su
+myname#
+</pre>
+<p>From here you can explore the system.  All of the man pages are installed, and there is enough of a base system to get going.  Sadly there are bugs in how <a title="4.2 BSD" href="https://gunkies.org/wiki/4.2_BSD">4.2 BSD</a> and how <a title="SIMH" href="https://gunkies.org/wiki/SIMH">SIMH</a> interact with  the networking, and it is not reliable. As sad as it is to be an 'island' you can however setup the dz serial interface to allow more than one user.
+</p>
+<h3><span id="Enabling_remote_users">Enabling remote users</span></h3>
+<p>Inside of BSD 4.3 you will have to create the dz device files.  Simply logon as root, and run the following commands:
+</p>
+<pre>cd /dev
+sh ./MAKEDEV dz0
+</pre>
+<p>Next, shutdown the OS, and add the following lines into the boot.ini (just make sure they are above the boot command or it'll not work correctly..).  This will allow for 8 users to connect on tcp port 8888.
+</p>
+<pre>set dz lines=8
+att dz 8888
+set dz 7b
+</pre>
+<p>I would also recommend to windows users, either <a title="Putty" href="https://gunkies.org/wiki/Putty">putty</a>, or <a title="Syncterm" href="https://gunkies.org/wiki/Syncterm">syncterm</a>.  The default telnet client sucks.
+</p>
+<h2><span id="Idle">Idle</span></h2>
+<p>On SIMH 3.8-0 I've noticed that if you set the cpu idle to 32v, 4.3 BSD can idle on the 11/780 emualtor...  Simply add the following line to your boot.ini
+</p>
+<pre>set cpu idle=32v
+</pre>
+<hr>
+<small>
+<small>
+<small>
+<a href="https://gunkies.org/wiki/Installing_4.3_BSD_on_SIMH"><b>Original webpage</b></a>
+</br>
+<a href="Installing 4.3 BSD on SIMH - Computer History Wiki.html"><b>Original archived webpage</b></a>
+</small>
+</small>
+</small>
+
+
+</div></div>
+<body>
+
+</body></html>
